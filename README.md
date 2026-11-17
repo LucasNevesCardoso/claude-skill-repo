@@ -6,8 +6,6 @@ Página: https://lucasnevescardoso.github.io/claude-skill-repo/
 
 ## Instalação
 
-**Com dois cliques:** na [página](https://lucasnevescardoso.github.io/claude-skill-repo/), clique em **Baixar e instalar** e abra o arquivo baixado (`instalar-repo.cmd` no Windows, `instalar-repo.command` dentro do zip no macOS).
-
 **macOS / Linux / Git Bash**
 
 ```bash

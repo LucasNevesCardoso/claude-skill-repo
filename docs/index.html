@@ -49,22 +49,10 @@ nav .links a:hover{color:var(--ink)}
 .eyebrow{font:500 13px var(--mono);color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
 h1{font-size:clamp(38px,5.4vw,60px);line-height:1.04;letter-spacing:-.025em;margin:14px 0 18px;font-weight:700}
 h1 em{font-style:normal;color:var(--accent)}
-.lede{font-size:19px;color:var(--muted);max-width:30em;margin:0 0 30px}
-
-/* download */
-.dl{margin:0 0 18px}
-.dl[hidden]{display:none}
-.btn{display:inline-flex;align-items:center;gap:10px;background:var(--accent);color:var(--accent-ink);text-decoration:none;font:600 16px var(--sans);padding:14px 22px;border-radius:11px;box-shadow:0 6px 20px color-mix(in srgb,var(--accent) 30%,transparent);transition:transform .12s,filter .12s}
-.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
-.btn:active{transform:none}
-.btn svg{width:18px;height:18px;flex:none}
-.btn small{font:500 12.5px var(--mono);opacity:.75}
-.dl-note{font-size:14px;color:var(--muted);margin:10px 2px 0;max-width:34em}
-.dl-note b{color:var(--ink);font-weight:600}
-.dl-alt{display:block;font-size:13.5px;color:var(--muted);margin:16px 2px 8px}
+.lede{font-size:19px;color:var(--muted);max-width:30em;margin:0}
 
 /* install box */
-.install{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.install{grid-column:1/-1;background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
 .tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surface-2);overflow-x:auto}
 .tab{appearance:none;border:0;background:none;font:500 14px var(--sans);color:var(--muted);padding:11px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
 .tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);background:var(--surface)}
@@ -162,41 +150,32 @@ footer a{color:var(--ink)}
       <div class="eyebrow">Skill para Claude Code</div>
       <h1>Um agente.<br><em>Um repositório.</em></h1>
       <p class="lede">O <code>/repo</code> trava cada sessão do Claude Code em um único repositório do GitHub. Vários agentes podem rodar em paralelo sem que um mexa no projeto do outro, e suas pastas locais continuam em dia com o GitHub.</p>
-
-      <div class="dl" id="dl" hidden>
-        <a class="btn" id="dl-btn" href="instalar-repo.cmd" download>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12M6 11l6 6 6-6M4 21h16"/></svg>
-          <span id="dl-label">Baixar instalador</span>
-        </a>
-        <p class="dl-note" id="dl-note"></p>
-        <span class="dl-alt">Ou instale pelo terminal:</span>
-      </div>
-
-      <div class="install" id="instalar">
-        <div class="tabs" role="tablist" aria-label="Sistema">
-          <button class="tab" role="tab" id="t-unix" aria-controls="p-unix" aria-selected="true">macOS / Linux</button>
-          <button class="tab" role="tab" id="t-win" aria-controls="p-win" aria-selected="false" tabindex="-1">Windows</button>
-          <button class="tab" role="tab" id="t-plug" aria-controls="p-plug" aria-selected="false" tabindex="-1">Plugin</button>
-        </div>
-        <div class="panel" role="tabpanel" id="p-unix" aria-labelledby="t-unix">
-          <div class="cmd"><pre><span class="p">$ </span>curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash</pre><button class="copy" data-copy="curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash">Copiar</button></div>
-          <p class="hint">Também funciona no Git Bash e no WSL. Instala em <code>~/.claude/skills/repo</code>.</p>
-        </div>
-        <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win" hidden>
-          <div class="cmd"><pre><span class="p">PS&gt; </span>irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex</pre><button class="copy" data-copy="irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex">Copiar</button></div>
-          <p class="hint">Rode no PowerShell. Instala em <code>%USERPROFILE%\.claude\skills\repo</code>.</p>
-        </div>
-        <div class="panel" role="tabpanel" id="p-plug" aria-labelledby="t-plug" hidden>
-          <div class="cmd"><pre>/plugin marketplace add LucasNevesCardoso/claude-skill-repo
-/plugin install repo@repo-skill</pre><button class="copy" data-copy="/plugin marketplace add LucasNevesCardoso/claude-skill-repo&#10;/plugin install repo@repo-skill">Copiar</button></div>
-          <p class="hint">Digite dentro do Claude Code. Como plugin, a skill recebe atualizações.</p>
-        </div>
-      </div>
     </div>
 
     <div class="term" aria-label="Exemplo de uso">
       <div class="term-bar"><i></i><i></i><i></i><span>claude — ~/repos</span></div>
       <div class="term-body" id="demo" aria-live="off"></div>
+    </div>
+
+    <div class="install" id="instalar">
+      <div class="tabs" role="tablist" aria-label="Sistema">
+        <button class="tab" role="tab" id="t-unix" aria-controls="p-unix" aria-selected="true">macOS / Linux</button>
+        <button class="tab" role="tab" id="t-win" aria-controls="p-win" aria-selected="false" tabindex="-1">Windows</button>
+        <button class="tab" role="tab" id="t-plug" aria-controls="p-plug" aria-selected="false" tabindex="-1">Plugin</button>
+      </div>
+      <div class="panel" role="tabpanel" id="p-unix" aria-labelledby="t-unix">
+        <div class="cmd"><pre><span class="p">$ </span>curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash</pre><button class="copy" data-copy="curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash">Copiar</button></div>
+        <p class="hint">Também funciona no Git Bash e no WSL. Instala em <code>~/.claude/skills/repo</code>.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win" hidden>
+        <div class="cmd"><pre><span class="p">PS&gt; </span>irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex</pre><button class="copy" data-copy="irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex">Copiar</button></div>
+        <p class="hint">Rode no PowerShell. Instala em <code>%USERPROFILE%\.claude\skills\repo</code>.</p>
+      </div>
+      <div class="panel" role="tabpanel" id="p-plug" aria-labelledby="t-plug" hidden>
+        <div class="cmd"><pre>/plugin marketplace add LucasNevesCardoso/claude-skill-repo
+/plugin install repo@repo-skill</pre><button class="copy" data-copy="/plugin marketplace add LucasNevesCardoso/claude-skill-repo&#10;/plugin install repo@repo-skill">Copiar</button></div>
+        <p class="hint">Digite dentro do Claude Code. Como plugin, a skill recebe atualizações.</p>
+      </div>
     </div>
   </header>
 </div>
@@ -283,26 +262,7 @@ footer a{color:var(--ink)}
       var n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus();
     });
   });
-  var ua = navigator.userAgent, plat = navigator.platform || '';
-  var isWin = /Win/i.test(plat) || /Windows/i.test(ua);
-  var isMac = !isWin && /Mac/i.test(plat) && !/iPhone|iPad/i.test(ua) && navigator.maxTouchPoints < 2;
-  if (isWin) select(document.getElementById('t-win'));
-
-  // Botao de download conforme o sistema
-  var dl = document.getElementById('dl'), btn = document.getElementById('dl-btn');
-  var label = document.getElementById('dl-label'), note = document.getElementById('dl-note');
-  if (isWin){
-    btn.href = 'instalar-repo.cmd'; btn.setAttribute('download', 'instalar-repo.cmd');
-    label.innerHTML = 'Baixar e instalar <small>Windows</small>';
-    note.innerHTML = 'Abra o arquivo baixado e a skill é instalada. Se o Windows mostrar um aviso, clique em <b>Mais informações → Executar assim mesmo</b>.';
-    dl.hidden = false;
-  } else if (isMac){
-    btn.href = 'instalar-repo-mac.zip'; btn.setAttribute('download', 'instalar-repo-mac.zip');
-    label.innerHTML = 'Baixar e instalar <small>macOS</small>';
-    note.innerHTML = 'Dê dois cliques em <b>instalar-repo.command</b>. Se o macOS bloquear, vá em <b>Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim</b>.';
-    select(document.getElementById('t-unix'));
-    dl.hidden = false;
-  }
+  if (/Win/i.test(navigator.platform || navigator.userAgent)) select(document.getElementById('t-win'));
 
   // Copiar
   document.querySelectorAll('.copy').forEach(function(b){
