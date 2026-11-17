@@ -33,6 +33,7 @@ O instalador grava a skill em `~/.claude/skills/repo/SKILL.md`. Se já existir u
 |---|---|
 | `/repo` | Mostra a lista de comandos |
 | `/repo create NOMEDAPASTA` | Cria uma pasta onde cada subpasta é um repositório |
+| `/repo view` | Lista os repositórios das pastas registradas |
 | `/repo <repositorio>` | Localiza o repositório e mostra o estado |
 | `/repo <repositorio> lock` | Trava a sessão nesse repositório |
 | `/repo <repositorio> unlock` | Destrava a sessão |

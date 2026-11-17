@@ -1,6 +1,6 @@
 ---
 name: "repo"
-description: Trava a sessão em um único repositório do GitHub e organiza as pastas de repositórios locais. Use SEMPRE que o usuário digitar /repo, em qualquer forma - "/repo create NOMEDAPASTA", "/repo nome-do-repositorio lock", "/repo nome-do-repositorio unlock", "/repo review", "/repo review nome-do-repositorio" ou "/repo TaskManagement nome-do-repositorio". Use também quando o usuário pedir para "trabalhar só no repositório X", "focar no repo X", "conferir se minhas pastas estão atualizadas com o GitHub" ou "ver a atividade do repositório X", mesmo sem citar /repo.
+description: Trava a sessão em um único repositório do GitHub e organiza as pastas de repositórios locais. Use SEMPRE que o usuário digitar /repo, em qualquer forma - "/repo create NOMEDAPASTA", "/repo view", "/repo nome-do-repositorio lock", "/repo nome-do-repositorio unlock", "/repo review", "/repo review nome-do-repositorio" ou "/repo TaskManagement nome-do-repositorio". Use também quando o usuário pedir para "trabalhar só no repositório X", "focar no repo X", "conferir se minhas pastas estão atualizadas com o GitHub", "quais repositórios eu tenho clonados" ou "ver a atividade do repositório X", mesmo sem citar /repo.
 ---
 
 # repo
@@ -13,6 +13,7 @@ Esta skill prende a sessão a **um único repositório** para que este agente n�
 |---|---|
 | `/repo` (sem argumento) | Mostrar a lista de comandos (ver "Ajuda") |
 | `/repo create NOMEDAPASTA` | Criar uma pasta local em que cada subpasta é um repositório |
+| `/repo view` | Listar os repositórios que estão nas pastas registradas |
 | `/repo <nome-do-repositorio>` | Localizar o repositório e mostrar o estado dele, sem travar |
 | `/repo <nome-do-repositorio> lock` | **Travar** a sessão no repositório: não mexer em mais nada sem autorização |
 | `/repo <nome-do-repositorio> unlock` | **Destravar** a sessão |
@@ -20,7 +21,7 @@ Esta skill prende a sessão a **um único repositório** para que este agente n�
 | `/repo review <nome-do-repositorio>` | A mesma validação, só nesse repositório |
 | `/repo TaskManagement <nome-do-repositorio>` | Auditar commits, PRs, code reviews e atividade dos usuários no repositório |
 
-Se o primeiro argumento for `create`, `review` ou `TaskManagement`, é um comando. Qualquer outro texto é o nome de um repositório, e a palavra final `lock` ou `unlock`, se houver, é a ação sobre ele.
+Se o primeiro argumento for `create`, `view`, `review` ou `TaskManagement`, é um comando. Qualquer outro texto é o nome de um repositório, e a palavra final `lock` ou `unlock`, se houver, é a ação sobre ele.
 
 ## Ajuda (`/repo` sem argumento)
 
@@ -30,6 +31,7 @@ Não faça busca nem alteração. Mostre apenas esta lista e pergunte o que o us
 Comandos disponíveis:
 
 /repo create NOMEDAPASTA                 Cria uma pasta onde cada subpasta é um repositório
+/repo view                               Lista os repositórios das pastas registradas
 /repo <repositorio>                      Localiza o repositório e mostra o estado
 /repo <repositorio> lock                 Trava a sessão nesse repositório
 /repo <repositorio> unlock               Destrava a sessão
@@ -48,6 +50,31 @@ O arquivo `~/.repo-skill/pastas` guarda uma pasta base por linha (caminho absolu
 2. Se a pasta já existir, não recrie. Avise e garanta apenas que ela está no registro.
 3. Crie a pasta com `mkdir -p` e adicione o caminho a `~/.repo-skill/pastas` (crie o diretório `~/.repo-skill` se precisar), sem duplicar linhas.
 4. Informe o caminho criado. Não clone nada: os repositórios entram depois, com `/repo <nome>`.
+
+## `/repo view`
+
+Lista os repositórios que estão nas pastas criadas com `/repo create`. É **somente leitura** e rápido: não acessa a rede.
+
+1. Leia `~/.repo-skill/pastas`. Se não existir ou estiver vazio, avise que nenhuma pasta foi criada ainda, sugira `/repo create NOMEDAPASTA` e pare.
+2. Para cada pasta do registro, liste as subpastas diretas. Se a pasta não existir mais, mostre isso e siga para a próxima.
+3. Para cada subpasta, colete só informações locais, sem `git fetch`:
+   - se é um repositório git;
+   - o remoto (`git remote get-url origin`), mostrado como `dono/repositorio`;
+   - a branch atual e se há alterações não salvas (`git status -sb --porcelain`).
+4. Mostre uma tabela por pasta base, em ordem alfabética, com o total no título:
+
+```
+~/repos (3 repositórios)
+
+  Repositório     GitHub                    Branch   Estado
+  api-gateway     acme/api-gateway          main     limpo
+  projeto-bi  🔒  acme/projeto-bi           dev      2 arquivos alterados
+  rascunhos       (não é repositório git)   -        -
+```
+
+5. Marque com 🔒 o repositório em que a sessão está travada, se houver.
+6. Se uma pasta não tiver nenhuma subpasta, diga que está vazia e lembre que `/repo <nome>` clona um repositório nela.
+7. Termine lembrando, em uma linha, que `/repo review` compara tudo com o GitHub. Não altere nada nem ofereça correções aqui.
 
 ## `/repo <nome-do-repositorio>` e `/repo <nome-do-repositorio> lock`
 
@@ -85,7 +112,7 @@ A partir daí:
 - Use o `gh` só para esse repositório (`--repo <dono>/<repositorio>`).
 - Se o usuário pedir algo que exija sair do repositório, **avise e pergunte antes**. Não saia por conta própria.
 - A trava só termina com `/repo <nome> unlock`. Para trocar de repositório, o usuário destrava e trava no outro. Se pedir `lock` em outro repositório com a sessão já travada, avise e peça que destrave antes.
-- Exceção: os comandos `/repo review` e `/repo TaskManagement` podem olhar outros repositórios mesmo com a sessão travada, porque foram pedidos explicitamente pelo usuário. Eles não alteram a trava.
+- Exceção: os comandos `/repo view`, `/repo review` e `/repo TaskManagement` podem olhar outros repositórios mesmo com a sessão travada, porque foram pedidos explicitamente pelo usuário. Eles não alteram a trava.
 
 ## `/repo review` e `/repo review <nome>`
 
