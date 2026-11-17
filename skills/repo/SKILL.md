@@ -5,14 +5,14 @@ description: Trava a sessão em um único repositório do GitHub e organiza as p
 
 # repo
 
-Esta skill prende a sessão a **um único repositório** para que este agente não se confunda com outros agentes do Claude Code. Também cria pastas para guardar repositórios e confere se elas estão em dia com o GitHub.
+Esta skill prende a sessão a **um único repositório** para que este agente não se confunda com outros agentes do Claude Code. Também cria uma pasta com todos os seus repositórios do GitHub clonados e confere se ela está em dia.
 
 ## Comandos
 
 | Entrada | Ação |
 |---|---|
 | `/repo` (sem argumento) | Mostrar a lista de comandos (ver "Ajuda") |
-| `/repo create NOMEDAPASTA` | Criar uma pasta local em que cada subpasta é um repositório |
+| `/repo create NOMEDAPASTA` | Criar uma pasta local e clonar nela todos os repositórios do GitHub do usuário, um por subpasta |
 | `/repo view` | Listar os repositórios que estão nas pastas registradas |
 | `/repo <nome-do-repositorio>` | Localizar o repositório e mostrar o estado dele, sem travar |
 | `/repo <nome-do-repositorio> lock` | **Travar** a sessão no repositório: não mexer em mais nada sem autorização |
@@ -30,7 +30,7 @@ Não faça busca nem alteração. Mostre apenas esta lista e pergunte o que o us
 ```
 Comandos disponíveis:
 
-/repo create NOMEDAPASTA                 Cria uma pasta onde cada subpasta é um repositório
+/repo create NOMEDAPASTA                 Cria a pasta e clona nela todos os seus repositórios
 /repo view                               Lista os repositórios das pastas registradas
 /repo <repositorio>                      Localiza o repositório e mostra o estado
 /repo <repositorio> lock                 Trava a sessão nesse repositório
@@ -46,10 +46,31 @@ O arquivo `~/.repo-skill/pastas` guarda uma pasta base por linha (caminho absolu
 
 ## `/repo create NOMEDAPASTA`
 
-1. Valide o nome (ver "Cuidados"). Se o usuário der um caminho completo, use-o. Se der só um nome, crie em `~/NOMEDAPASTA`.
-2. Se a pasta já existir, não recrie. Avise e garanta apenas que ela está no registro.
-3. Crie a pasta com `mkdir -p` e adicione o caminho a `~/.repo-skill/pastas` (crie o diretório `~/.repo-skill` se precisar), sem duplicar linhas.
-4. Informe o caminho criado. Não clone nada: os repositórios entram depois, com `/repo <nome>`.
+Cria a pasta e deixa nela uma cópia local de **todos** os repositórios do GitHub do usuário, no estado atual do GitHub. Rodar o comando já é a autorização para clonar.
+
+**1. Preparar a pasta**
+1. Valide o nome (ver "Cuidados"). Se o usuário der um caminho completo, use-o. Se der só um nome, use `~/NOMEDAPASTA`.
+2. Confirme que o `gh` está autenticado (`gh auth status`). Se não estiver, avise e pare.
+3. Crie a pasta com `mkdir -p` (se já existir, não recrie: siga usando a mesma) e adicione o caminho a `~/.repo-skill/pastas` (crie `~/.repo-skill` se precisar), sem duplicar linhas.
+
+**2. Listar os repositórios no GitHub**
+1. Repositórios do usuário: `gh repo list --limit 1000 --json nameWithOwner,name,isArchived`.
+2. Repositórios de cada organização dele (`gh org list`): `gh repo list <org> --limit 1000 --json nameWithOwner,name,isArchived`.
+3. Inclua os arquivados também, para a pasta refletir tudo o que existe no GitHub.
+4. Se dois repositórios tiverem o mesmo nome (por exemplo, `usuario/api` e `org/api`), o segundo vai para a subpasta `<dono>-<nome>` para não colidir.
+5. Antes de começar, informe em uma linha quantos repositórios serão clonados e de quais donos. Se forem **mais de 50**, peça confirmação, porque pode demorar e ocupar espaço.
+
+**3. Sincronizar cada repositório**
+Para cada repositório, na subpasta `<pasta>/<nome>`:
+- **Não existe:** clone com `gh repo clone "<dono>/<nome>" "<pasta>/<nome>"`.
+- **Já existe e é o mesmo repositório** (`origin` aponta para ele): rode `git fetch` e, se não houver alterações não salvas e a branch estiver só atrás, atualize com `git pull --ff-only`. Com alterações não salvas ou divergente, **não mexa**: apenas anote.
+- **Já existe mas é outra coisa** (outro remoto ou não é git): não mexa e anote.
+- Se um clone falhar, anote o erro e siga para o próximo. Não pare tudo por causa de um repositório.
+
+**4. Relatório**
+Mostre o caminho da pasta e um resumo: quantos foram clonados, atualizados, já estavam em dia, ignorados (com o motivo) e falharam (com o erro). Depois sugira `/repo view` para ver a lista e `/repo <nome> lock` para começar a trabalhar em um deles.
+
+Nunca apague nem sobrescreva uma subpasta que já existe, e nunca use `reset --hard`, `clean` ou `push --force` aqui.
 
 ## `/repo view`
 

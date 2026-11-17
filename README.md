@@ -32,7 +32,7 @@ O instalador grava a skill em `~/.claude/skills/repo/SKILL.md`. Se já existir u
 | Comando | O que faz |
 |---|---|
 | `/repo` | Mostra a lista de comandos |
-| `/repo create NOMEDAPASTA` | Cria uma pasta onde cada subpasta é um repositório |
+| `/repo create NOMEDAPASTA` | Cria a pasta e clona nela todos os seus repositórios do GitHub |
 | `/repo view` | Lista os repositórios das pastas registradas |
 | `/repo <repositorio>` | Localiza o repositório e mostra o estado |
 | `/repo <repositorio> lock` | Trava a sessão nesse repositório |

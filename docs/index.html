@@ -197,7 +197,7 @@ footer a{color:var(--ink)}
     <h2>Comandos</h2>
     <p class="sub">Digite <code>/repo</code> sem nada para ver esta lista dentro do Claude Code.</p>
     <div class="cmds">
-      <div class="row"><code>/repo create <span class="a">NOMEDAPASTA</span></code><p>Cria uma pasta onde cada subpasta é um repositório e a registra.</p><span class="tag ask">cria pasta</span></div>
+      <div class="row"><code>/repo create <span class="a">NOMEDAPASTA</span></code><p>Cria a pasta e clona nela todos os seus repositórios do GitHub, um por subpasta. Rodar de novo atualiza o que estiver atrás e clona os novos.</p><span class="tag ask">clona tudo</span></div>
       <div class="row"><code>/repo view</code><p>Lista os repositórios das suas pastas, com branch e alterações não salvas.</p><span class="tag ro">leitura</span></div>
       <div class="row"><code>/repo <span class="a">&lt;repositorio&gt;</span></code><p>Localiza o repositório e mostra o estado. Se não estiver clonado, pede autorização para clonar.</p><span class="tag ro">leitura</span></div>
       <div class="row"><code>/repo <span class="a">&lt;repositorio&gt;</span> lock</code><p>Trava a sessão nesse repositório até o unlock.</p><span class="tag lock">trava</span></div>
@@ -230,7 +230,7 @@ footer a{color:var(--ink)}
     <p class="sub">Precisa do <a href="https://cli.github.com/">GitHub CLI</a> instalado e autenticado.</p>
     <div class="steps">
       <div class="step"><h3>Instale</h3><p>Rode o comando do seu sistema lá em cima e reinicie o Claude Code.</p></div>
-      <div class="step"><h3>Crie sua pasta</h3><p><code>/repo create repos</code> cria <code>~/repos</code>, onde os projetos vão morar.</p></div>
+      <div class="step"><h3>Crie sua pasta</h3><p><code>/repo create repos</code> cria <code>~/repos</code> e já clona nela todos os seus repositórios.</p></div>
       <div class="step"><h3>Trave e trabalhe</h3><p><code>/repo meu-projeto lock</code> clona se precisar e prende a sessão nele.</p></div>
     </div>
   </div>
