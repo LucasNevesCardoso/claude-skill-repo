@@ -1,0 +1,9 @@
+{
+  "name": "repo",
+  "version": "1.0.0",
+  "description": "Trava a sessão do Claude Code em um único repositório do GitHub e mantém suas pastas locais em dia com o GitHub.",
+  "author": { "name": "LucasNevesCardoso" },
+  "homepage": "https://lucasnevescardoso.github.io/claude-skill-repo/",
+  "repository": "https://github.com/LucasNevesCardoso/claude-skill-repo",
+  "keywords": ["git", "github", "repositorio", "agentes", "workflow"]
+}

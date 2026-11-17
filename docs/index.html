@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>/repo — skill para Claude Code</title>
+<meta name="description" content="Trava o Claude Code em um único repositório do GitHub e mantém suas pastas locais em dia. Instale com um comando.">
+<meta property="og:title" content="/repo — skill para Claude Code">
+<meta property="og:description" content="Um agente, um repositório. Instale com um comando.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23e8743b'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='16' font-weight='700' text-anchor='middle' fill='%23fff'%3E/r%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f6f3ee; --surface:#fffdf9; --surface-2:#efeae2; --ink:#1d1b18; --muted:#6b655c;
+  --line:#e0d9cd; --accent:#d4622a; --accent-ink:#fff; --ok:#2f8a57; --warn:#b7791f;
+  --term-bg:#191714; --term-ink:#ece6dc; --term-muted:#8d857a; --term-line:#2c2925;
+  --shadow:0 1px 2px rgba(30,20,10,.05),0 8px 30px rgba(30,20,10,.06);
+  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#13110f; --surface:#1b1916; --surface-2:#24211d; --ink:#ede7dd; --muted:#9c9488;
+    --line:#2f2b26; --accent:#ef8a55; --accent-ink:#1a1009; --ok:#5cc28a; --warn:#e0a84a;
+    --term-bg:#0d0c0a; --term-line:#25221e;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 40px rgba(0,0,0,.35);
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:inherit}
+code,kbd,pre{font-family:var(--mono)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+
+/* nav */
+nav{display:flex;align-items:center;justify-content:space-between;padding:22px 0}
+.logo{font:700 18px var(--mono);text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--accent);color:var(--accent-ink);font-size:14px}
+nav .links{display:flex;gap:22px;font-size:15px}
+nav .links a{text-decoration:none;color:var(--muted)}
+nav .links a:hover{color:var(--ink)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;padding:48px 0 72px}
+.eyebrow{font:500 13px var(--mono);color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
+h1{font-size:clamp(38px,5.4vw,60px);line-height:1.04;letter-spacing:-.025em;margin:14px 0 18px;font-weight:700}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:19px;color:var(--muted);max-width:30em;margin:0 0 30px}
+
+/* install box */
+.install{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.tabs{display:flex;border-bottom:1px solid var(--line);background:var(--surface-2);overflow-x:auto}
+.tab{appearance:none;border:0;background:none;font:500 14px var(--sans);color:var(--muted);padding:11px 16px;cursor:pointer;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px}
+.tab[aria-selected=true]{color:var(--ink);border-bottom-color:var(--accent);background:var(--surface)}
+.panel{padding:16px}
+.panel[hidden]{display:none}
+.cmd{display:flex;align-items:center;gap:10px;background:var(--term-bg);color:var(--term-ink);border-radius:9px;padding:12px 12px 12px 14px}
+.cmd pre{margin:0;flex:1;overflow-x:auto;font-size:13.5px;line-height:1.55;white-space:pre}
+.cmd pre .p{color:var(--term-muted);user-select:none}
+.copy{flex:none;appearance:none;border:1px solid var(--term-line);background:#ffffff0d;color:var(--term-ink);font:500 12.5px var(--mono);padding:7px 11px;border-radius:7px;cursor:pointer;align-self:flex-start}
+.copy:hover{background:#ffffff1a}
+.copy.ok{color:#7fe0a8;border-color:#2f6b4a}
+.hint{font-size:13.5px;color:var(--muted);margin:12px 2px 0}
+.hint code{font-size:12.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px}
+
+/* terminal demo */
+.term{background:var(--term-bg);color:var(--term-ink);border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--term-line);overflow:hidden}
+.term-bar{display:flex;align-items:center;gap:7px;padding:12px 14px;border-bottom:1px solid var(--term-line)}
+.term-bar i{width:11px;height:11px;border-radius:50%;background:#3a3631}
+.term-bar span{margin-left:8px;font:12px var(--mono);color:var(--term-muted)}
+.term-body{font:13.5px/1.7 var(--mono);padding:18px 18px 22px;min-height:340px;white-space:pre-wrap;word-break:break-word}
+.term-body .u{color:#f0a070}
+.term-body .d{color:var(--term-muted)}
+.term-body .g{color:#7fe0a8}
+.term-body .y{color:#e6c07b}
+.caret{display:inline-block;width:8px;height:1.1em;background:var(--term-ink);vertical-align:-3px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+/* sections */
+section{padding:72px 0;border-top:1px solid var(--line)}
+h2{font-size:clamp(26px,3.2vw,34px);letter-spacing:-.015em;margin:0 0 10px;line-height:1.15}
+.sub{color:var(--muted);margin:0 0 34px;max-width:40em;font-size:17px}
+
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:22px}
+.card h3{margin:0 0 6px;font-size:17px}
+.card p{margin:0;color:var(--muted);font-size:15px}
+.card .k{font:600 12.5px var(--mono);color:var(--accent);display:block;margin-bottom:12px}
+
+/* commands */
+.cmds{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.row{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1.4fr) auto;gap:18px;align-items:center;padding:15px 20px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.row code{font-size:14px;font-weight:500}
+.row code .a{color:var(--muted)}
+.row p{margin:0;color:var(--muted);font-size:15px}
+.tag{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:99px;border:1px solid currentColor;white-space:nowrap}
+.tag.ro{color:var(--ok)}
+.tag.ask{color:var(--warn)}
+.tag.lock{color:var(--accent)}
+
+/* safety */
+.safe{display:grid;grid-template-columns:repeat(2,1fr);gap:12px 36px;padding:0;margin:0;list-style:none}
+.safe li{display:flex;gap:12px;font-size:15.5px}
+.safe li::before{content:"✓";color:var(--ok);font-weight:700;flex:none}
+
+/* steps */
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;counter-reset:s}
+.step{counter-increment:s;padding-top:4px}
+.step::before{content:counter(s,decimal-leading-zero);font:700 13px var(--mono);color:var(--accent);display:block;margin-bottom:8px}
+.step h3{margin:0 0 6px;font-size:17px}
+.step p{margin:0;color:var(--muted);font-size:15px}
+.step code{font-size:13px;background:var(--surface-2);padding:1px 6px;border-radius:4px;color:var(--ink)}
+
+footer{border-top:1px solid var(--line);padding:30px 0 48px;color:var(--muted);font-size:14px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+footer a{color:var(--ink)}
+
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+@media (max-width:860px){
+  .hero{grid-template-columns:1fr;gap:36px;padding:28px 0 56px}
+  .why,.steps{grid-template-columns:1fr}
+  .safe{grid-template-columns:1fr}
+  .row{grid-template-columns:1fr;gap:6px}
+  .row .tag{justify-self:start}
+  nav .links a:not(.gh){display:none}
+  section{padding:56px 0}
+  .term-body{min-height:300px;font-size:12.5px}
+}
+@media (prefers-reduced-motion:reduce){.caret{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a class="logo" href="#"><b>/r</b>repo</a>
+    <div class="links">
+      <a href="#comandos">Comandos</a>
+      <a href="#seguranca">Segurança</a>
+      <a class="gh" href="https://github.com/LucasNevesCardoso/claude-skill-repo">GitHub ↗</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div>
+      <div class="eyebrow">Skill para Claude Code</div>
+      <h1>Um agente.<br><em>Um repositório.</em></h1>
+      <p class="lede">O <code>/repo</code> trava cada sessão do Claude Code em um único repositório do GitHub. Vários agentes podem rodar em paralelo sem que um mexa no projeto do outro, e suas pastas locais continuam em dia com o GitHub.</p>
+
+      <div class="install" id="instalar">
+        <div class="tabs" role="tablist" aria-label="Sistema">
+          <button class="tab" role="tab" id="t-unix" aria-controls="p-unix" aria-selected="true">macOS / Linux</button>
+          <button class="tab" role="tab" id="t-win" aria-controls="p-win" aria-selected="false" tabindex="-1">Windows</button>
+          <button class="tab" role="tab" id="t-plug" aria-controls="p-plug" aria-selected="false" tabindex="-1">Plugin</button>
+        </div>
+        <div class="panel" role="tabpanel" id="p-unix" aria-labelledby="t-unix">
+          <div class="cmd"><pre><span class="p">$ </span>curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash</pre><button class="copy" data-copy="curl -fsSL https://lucasnevescardoso.github.io/claude-skill-repo/install.sh | bash">Copiar</button></div>
+          <p class="hint">Também funciona no Git Bash e no WSL. Instala em <code>~/.claude/skills/repo</code>.</p>
+        </div>
+        <div class="panel" role="tabpanel" id="p-win" aria-labelledby="t-win" hidden>
+          <div class="cmd"><pre><span class="p">PS&gt; </span>irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex</pre><button class="copy" data-copy="irm https://lucasnevescardoso.github.io/claude-skill-repo/install.ps1 | iex">Copiar</button></div>
+          <p class="hint">Rode no PowerShell. Instala em <code>%USERPROFILE%\.claude\skills\repo</code>.</p>
+        </div>
+        <div class="panel" role="tabpanel" id="p-plug" aria-labelledby="t-plug" hidden>
+          <div class="cmd"><pre>/plugin marketplace add LucasNevesCardoso/claude-skill-repo
+/plugin install repo@repo-skill</pre><button class="copy" data-copy="/plugin marketplace add LucasNevesCardoso/claude-skill-repo&#10;/plugin install repo@repo-skill">Copiar</button></div>
+          <p class="hint">Digite dentro do Claude Code. Como plugin, a skill recebe atualizações.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="term" aria-label="Exemplo de uso">
+      <div class="term-bar"><i></i><i></i><i></i><span>claude — ~/repos</span></div>
+      <div class="term-body" id="demo" aria-live="off"></div>
+    </div>
+  </header>
+</div>
+
+<section>
+  <div class="wrap">
+    <h2>Por que travar a sessão?</h2>
+    <p class="sub">Com vários agentes abertos, é fácil um deles ler, editar ou rodar comandos no projeto errado. O <code>/repo</code> põe uma cerca em volta de cada sessão.</p>
+    <div class="why">
+      <div class="card"><span class="k">lock / unlock</span><h3>Uma cerca por sessão</h3><p>Depois do lock, o agente só lê, edita e executa dentro daquele repositório. Para sair, ele pergunta antes.</p></div>
+      <div class="card"><span class="k">review</span><h3>Pastas sempre em dia</h3><p>Compara cada pasta com o GitHub: atrasada, divergente, renomeada, com alterações não salvas ou ainda não clonada.</p></div>
+      <div class="card"><span class="k">TaskManagement</span><h3>Atividade do time</h3><p>Levanta commits, PRs, code reviews e issues por pessoa, no período que você escolher. Só leitura, só números.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="comandos">
+  <div class="wrap">
+    <h2>Comandos</h2>
+    <p class="sub">Digite <code>/repo</code> sem nada para ver esta lista dentro do Claude Code.</p>
+    <div class="cmds">
+      <div class="row"><code>/repo create <span class="a">NOMEDAPASTA</span></code><p>Cria uma pasta onde cada subpasta é um repositório e a registra.</p><span class="tag ask">cria pasta</span></div>
+      <div class="row"><code>/repo <span class="a">&lt;repositorio&gt;</span></code><p>Localiza o repositório e mostra o estado. Se não estiver clonado, pede autorização para clonar.</p><span class="tag ro">leitura</span></div>
+      <div class="row"><code>/repo <span class="a">&lt;repositorio&gt;</span> lock</code><p>Trava a sessão nesse repositório até o unlock.</p><span class="tag lock">trava</span></div>
+      <div class="row"><code>/repo <span class="a">&lt;repositorio&gt;</span> unlock</code><p>Destrava a sessão.</p><span class="tag lock">destrava</span></div>
+      <div class="row"><code>/repo review</code><p>Valida todas as pastas registradas contra o GitHub e propõe correções.</p><span class="tag ask">pede aprovação</span></div>
+      <div class="row"><code>/repo review <span class="a">&lt;repositorio&gt;</span></code><p>A mesma validação, só em um repositório.</p><span class="tag ask">pede aprovação</span></div>
+      <div class="row"><code>/repo TaskManagement <span class="a">&lt;repositorio&gt;</span></code><p>Audita commits, PRs, reviews e atividade por usuário.</p><span class="tag ro">leitura</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="seguranca">
+  <div class="wrap">
+    <h2>Feito para não estragar nada</h2>
+    <p class="sub">A skill nunca toma uma ação destrutiva por conta própria.</p>
+    <ul class="safe">
+      <li>Atualiza só com <code>git pull --ff-only</code>. Nada de <code>reset --hard</code>, <code>clean</code> ou <code>push --force</code>.</li>
+      <li>Não atualiza repositório com alterações não salvas ou divergente: apenas avisa.</li>
+      <li>Não clona, cria ou apaga nada fora das pastas que você registrou.</li>
+      <li>Nunca apaga um repositório clonado sem explicar o que será perdido e perguntar.</li>
+      <li>Não faz <code>git push</code> sem pedido explícito.</li>
+      <li>Trata nomes digitados como dado, nunca como comando de shell.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2>Começando</h2>
+    <p class="sub">Precisa do <a href="https://cli.github.com/">GitHub CLI</a> instalado e autenticado.</p>
+    <div class="steps">
+      <div class="step"><h3>Instale</h3><p>Rode o comando do seu sistema lá em cima e reinicie o Claude Code.</p></div>
+      <div class="step"><h3>Crie sua pasta</h3><p><code>/repo create repos</code> cria <code>~/repos</code>, onde os projetos vão morar.</p></div>
+      <div class="step"><h3>Trave e trabalhe</h3><p><code>/repo meu-projeto lock</code> clona se precisar e prende a sessão nele.</p></div>
+    </div>
+  </div>
+</section>
+
+<div class="wrap">
+  <footer>
+    <span>/repo — skill aberta para Claude Code.</span>
+    <span><a href="https://github.com/LucasNevesCardoso/claude-skill-repo/blob/main/skills/repo/SKILL.md">Ler o SKILL.md</a> · <a href="https://github.com/LucasNevesCardoso/claude-skill-repo">Código no GitHub</a></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  // Abas
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('.tab'));
+  function select(tab){
+    tabs.forEach(function(t){
+      var on = t === tab;
+      t.setAttribute('aria-selected', on);
+      t.tabIndex = on ? 0 : -1;
+      document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+    });
+  }
+  tabs.forEach(function(t, i){
+    t.addEventListener('click', function(){ select(t); });
+    t.addEventListener('keydown', function(e){
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      var n = tabs[(i + d + tabs.length) % tabs.length]; select(n); n.focus();
+    });
+  });
+  if (/Win/i.test(navigator.platform || navigator.userAgent)) select(document.getElementById('t-win'));
+
+  // Copiar
+  document.querySelectorAll('.copy').forEach(function(b){
+    b.addEventListener('click', function(){
+      var txt = b.getAttribute('data-copy');
+      var done = function(){ b.textContent = 'Copiado'; b.classList.add('ok');
+        setTimeout(function(){ b.textContent = 'Copiar'; b.classList.remove('ok'); }, 1600); };
+      if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(done, fallback);
+      else fallback();
+      function fallback(){ var t = document.createElement('textarea'); t.value = txt; document.body.appendChild(t);
+        t.select(); try { document.execCommand('copy'); done(); } catch(e){} document.body.removeChild(t); }
+    });
+  });
+
+  // Demo do terminal
+  var el = document.getElementById('demo');
+  var script = [
+    ['type', '> /repo projeto-bi lock'],
+    ['out', '<span class="d">● gh auth status ✓</span>'],
+    ['out', '<span class="d">● Procurando em ~/repos …</span>'],
+    ['out', '<span class="g">Trabalhando somente em</span> <span class="y">acme/projeto-bi</span>'],
+    ['out', '<span class="d">  ~/repos/projeto-bi · main · em dia com o GitHub</span>'],
+    ['gap'],
+    ['type', '> edita o README do api-gateway também'],
+    ['out', '<span class="y">⚠ Isso fica fora de acme/projeto-bi.</span>'],
+    ['out', '  A sessão está travada. Posso sair do'],
+    ['out', '  repositório para fazer isso? (s/n)'],
+    ['gap'],
+    ['type', '> /repo review'],
+    ['out', '<span class="g">✓</span> projeto-bi     em dia'],
+    ['out', '<span class="y">↓</span> api-gateway    3 commits atrás'],
+    ['out', '<span class="y">+</span> design-system  ainda não clonado'],
+    ['out', '<span class="d">Proposta: atualizar 1, clonar 1. Aprova?</span>']
+  ];
+  var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+  function render(lines, partial){
+    el.innerHTML = lines.join('\n') + (partial !== undefined ? '\n' + partial : '') + '<span class="caret"></span>';
+  }
+  if (reduce){
+    render(script.map(function(s){ return s[0]==='gap' ? '' : s[0]==='type' ? '<span class="u">'+esc(s[1])+'</span>' : s[1]; }));
+    return;
+  }
+  function run(){
+    var lines = [], i = 0;
+    function next(){
+      if (i >= script.length){ setTimeout(run, 4200); return; }
+      var s = script[i++];
+      if (s[0] === 'gap'){ lines.push(''); render(lines); setTimeout(next, 500); }
+      else if (s[0] === 'out'){ lines.push(s[1]); render(lines); setTimeout(next, 170); }
+      else {
+        var c = 0, t = s[1];
+        (function typeChar(){
+          c++; render(lines, '<span class="u">' + esc(t.slice(0, c)) + '</span>');
+          if (c < t.length) setTimeout(typeChar, 32 + Math.random()*40);
+          else { lines.push('<span class="u">' + esc(t) + '</span>'); setTimeout(next, 380); }
+        })();
+      }
+    }
+    render(lines); setTimeout(next, 600);
+  }
+  run();
+})();
+</script>
+</body>
+</html>

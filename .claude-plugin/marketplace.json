@@ -1,0 +1,11 @@
+{
+  "name": "repo-skill",
+  "owner": { "name": "LucasNevesCardoso" },
+  "plugins": [
+    {
+      "name": "repo",
+      "source": "./",
+      "description": "Trava a sessão do Claude Code em um único repositório do GitHub e mantém suas pastas locais em dia com o GitHub."
+    }
+  ]
+}
