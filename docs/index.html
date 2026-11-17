@@ -72,7 +72,7 @@ h1 em{font-style:normal;color:var(--accent)}
 .term-bar{display:flex;align-items:center;gap:7px;padding:12px 14px;border-bottom:1px solid var(--term-line)}
 .term-bar i{width:11px;height:11px;border-radius:50%;background:#3a3631}
 .term-bar span{margin-left:8px;font:12px var(--mono);color:var(--term-muted)}
-.term-body{font:13.5px/1.7 var(--mono);padding:18px 18px 22px;min-height:340px;white-space:pre-wrap;word-break:break-word}
+.term-body{font:13.5px/1.7 var(--mono);padding:18px 18px 22px;min-height:340px;overflow:hidden;white-space:pre-wrap;word-break:break-word}
 .term-body .u{color:#f0a070}
 .term-body .d{color:var(--term-muted)}
 .term-body .g{color:#7fe0a8}
@@ -303,10 +303,22 @@ footer a{color:var(--ink)}
   function render(lines, partial){
     el.innerHTML = lines.join('\n') + (partial !== undefined ? '\n' + partial : '') + '<span class="caret"></span>';
   }
-  if (reduce){
-    render(script.map(function(s){ return s[0]==='gap' ? '' : s[0]==='type' ? '<span class="u">'+esc(s[1])+'</span>' : s[1]; }));
-    return;
+  var full = script.map(function(s){ return s[0]==='gap' ? '' : s[0]==='type' ? '<span class="u">'+esc(s[1])+'</span>' : s[1]; });
+
+  // Altura fixa = altura do texto completo, para o terminal nao crescer enquanto digita
+  function fitHeight(){
+    var current = el.innerHTML;
+    el.style.height = 'auto';
+    render(full);
+    el.style.height = el.offsetHeight + 'px';
+    el.innerHTML = current;
   }
+  fitHeight();
+  var rt;
+  window.addEventListener('resize', function(){ clearTimeout(rt); rt = setTimeout(fitHeight, 120); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeight);
+
+  if (reduce){ render(full); return; }
   function run(){
     var lines = [], i = 0;
     function next(){
